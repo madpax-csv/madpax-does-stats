@@ -1,0 +1,10 @@
+---
+title: "Welcome To My Blog"
+author: "Maddy Paxson"
+date: "2025-02-06"
+categories: [research]
+---
+
+This is my blog post! Here's a picture, too.
+
+![](hugowar.jpg)
