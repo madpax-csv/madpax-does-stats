@@ -1,5 +1,6 @@
 ---
-title: "Welcome To My Blog"
+title: "I know how to use a Quarto Blog"
+output-dir: docs
 author: "Maddy Paxson"
 date: "2025-02-06"
 categories: [research]
