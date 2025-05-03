@@ -18,7 +18,8 @@ But first, let's load and install all of the packages we'll need. Run the code b
 
 ```{r}
 #List of packages we'll use. 
-packages <- c("tidyverse", "lme4", "ggplot2", "readr","naniar")  
+
+packages <- c("tidyverse","dplyr", "lme4", "ggplot2", "readr","naniar","nortest")  
 #Identifies which packages you already have
 install_if_missing <- setdiff(packages, rownames(installed.packages()))
 #Installs packages you don't have
@@ -45,13 +46,13 @@ Then, in the Fall, Winter, and Spring, we asked if they still consider this pers
 
 We are using a few key variables:
 
--   **ID:** This is a given surveyed participants' unique ID number.
+-   **`ID`:** This is a given surveyed participants' unique ID number.
 
--   **Time:** This refers to the time point at which responses were given (i.e., Intake, Fall, Winter, Spring).
+-   **`Time`:** This refers to the time point at which responses were given (i.e., Intake, Fall, Winter, Spring).
 
--   **H_FriendID\_:** This is a unique ID for each friend that a participant listed.
+-   **`H_FriendID_`:** This is a unique ID for each friend that a participant listed.
 
--   **H_closeFriend:** This refers to how close a participant rated a friend at a given timepoint.
+-   **`H_closeFriend`:** This refers to how close a participant rated a friend at a given timepoint.
 
     -   1 = Not At All Close; 5 = Extremely Close
 
@@ -61,27 +62,19 @@ Before we dive in, let's widdle down our dataset **FFH (friends from home)** to 
 
 ```{r}
 FFH <- FFH %>%
-  select(c(
+  select(
     #Main variables of interest
     ID, Time, H_FriendID_, H_closeFriend,
-    #Potential Controls 
-    inFSI, age, H_Friend_Intake,
     #Potential Moderators
-    H_length, H_Friend_college,
+    H_Friend_college,
     #For Filtering
-    H_friend_in_Net
-  )) %>%
+    H_friend_in_Net) %>%
   mutate(
     ID = as.character(ID),
     Time = factor(Time, levels = c("Intake", "Fall", "Winter", "Spring")),
     H_FriendID_ = as.character(H_FriendID_),
     H_closeFriend = as.numeric(H_closeFriend),
-    H_Friend_college = factor(H_Friend_college, levels = c(0, 1)),
-    H_length = as.numeric(H_length),
-    inFSI = factor(inFSI, levels = c(0, 1)),
-    age = as.numeric(age),
-    H_Friend_Intake = as.numeric(H_Friend_Intake)
-  )
+    H_Friend_college = factor(H_Friend_college, levels = c(0, 1))  )
 FFH <- FFH %>%
   select(ID, H_FriendID_, everything())
 
@@ -143,7 +136,7 @@ FFH <- FFH %>%
 gg_miss_var(FFH)
 
 why <- FFH %>%
-  filter(is.na(H_length) | is.na(H_Friend_college))
+  filter(is.na(H_Friend_college))
 n_distinct(why$ID)
 ```
 
@@ -154,7 +147,12 @@ FFH <- FFH %>%
   mutate(H_closeFriend = if_else(H_friend_in_Net == 0, 1, H_closeFriend))
 ```
 
-At this stage, any remaining missing values reflect questions that participants skipped. For simplicity, we’ll leave these observations in the dataset—our models today will automatically exclude missing values during analysis.
+At this stage, any remaining missing values reflect questions that participants skipped. For simplicity, we’ll remove those cases. (Not really the main point of this tutorial)
+
+```{r}
+FFH <- FFH %>%
+  drop_na()
+```
 
 Let's take a quick look at more information about our data.
 
@@ -173,31 +171,307 @@ FFH %>%
        y = "Count") +
   theme_minimal() +
   theme(panel.grid = element_blank())
+
+lillie.test(FFH$H_closeFriend)
+
 ```
 
-**So, we have 288 participants and 1,617 unique friends listed. In the table, you'll see a breakdown of closeness at each time point.**
+**So, we have 288 participants and 1,617 unique friends listed. In the table, you'll see a breakdown of closeness at each time point. These histograms, plus a quick test of normality, show that our outcome is not normally distributed. But, it's worth making our model and then investigating once the model is set.**
 
-**Now that we know what we're working with, we can start to dicipher a model to investigate our research question:**
+**Now that we know what we're working with, we can start to decipher a model to investigate our research question:**
 
 What is the effect of Time on Closeness to friends from home?
 
-**Check assumptions.**
+Because of the nested nature of this data, our biggest contender is a mixed linear regression.
 
-**Choose a specific model.**
+A mixed linear model (also called a multilevel or hierarchical linear model) is a type of regression that accounts for nested or grouped data.
 
-**Run model.**
+In our case, closeness ratings are repeated over time within each friend, and each friend is nested within a participant. This violates the assumption of independence in traditional linear regression, because observations from the same person or the same friendship are likely to be more similar to each other than to those from others. A mixed linear regression is ideal here because it allows us to model both fixed effects (like time) and random effects (like variation across participants and friendships). This helps us better understand the average trends while also accounting for individual differences in how close someone feels to their friends in general.
 
-**Create visualizations.**
+But first, we need to check a few assumptions to make sure this is the right model for us.
 
-**Try model a different way. With controls? With random slopes etc?**
+# Checking Assumptions
 
-**Compare models.**
+Let's see that our outcome variables is roughly normally distributed.
+
+Before fitting a mixed model, it’s good practice to check whether the **outcome variable** is approximately normally distributed. For larger samples, `lillie.test()` from the `nortest` package is a more appropriate option. Still, these tests are sensitive — so it’s just as important to visually inspect the data using a histogram or a Q-Q plot. In our case, the closeness variable is on a 1–5 ordinal scale and shows a skewed, multimodal distribution, especially with a spike at “1” due to our recoding. This outcome isn't normally distributed, which we expected. That’s okay: normality is more important for model **residuals**, which we’ll check after fitting the model.
+
+```{r}
+hist(FFH$H_closeFriend)
+hist(FFH$H_closeFriend[FFH$Time=="Intake"])
+hist(FFH$H_closeFriend[FFH$Time=="Fall"])
+hist(FFH$H_closeFriend[FFH$Time=="Winter"])
+hist(FFH$H_closeFriend[FFH$Time=="Spring"])
+```
+
+We'll see how this plays out.
+
+Next, we're going to decide how to structure our model and whether we want to include random intercepts, random slopes, or both.
+
+**Random Intercepts**
+
+A **random intercept** allows each group (e.g., each participant or each friend) to have their own baseline level of the outcome (e.g., closeness). This is a good place to start when your data includes repeated measures or clustering.
+
+In our case, we’re measuring closeness to multiple friends over time, with friends nested within participants. So we could include:
+
+-   A random intercept for Participant ID, to account for differences in overall closeness across people
+
+-   A random intercept for Friend ID, to account for some friends being consistently rated higher or lower than others
+
+Let's make sure that it **makes sense** to have random intercept for these. We do this by looking at the variance in our outcome variable `H_closeFriend` within each of these levels.
+
+We'll start with a random intercept for `ID`.
+
+```{r}
+library(lme4)
+model_participant <- lmer(H_closeFriend ~ 1 + (1 | ID), data = FFH)
+# Extract variance components from the model
+var_components <- as.data.frame(VarCorr(model_participant))
+
+# Compute total variance
+total_variance <- sum(var_components$vcov)
+
+# Calculate proportion of variance at each level
+var_components$proportion <- var_components$vcov / total_variance
+
+# Show proportions in a readable table
+var_components[, c("grp", "vcov", "proportion")]
+# For participant-level ICC (model_participant)
+icc <- 0.6069 / (0.6069 + 1.7330)  # ≈ 0.26
+
+```
+
+There’s no strict cutoff for what counts as "high" random effect variance, but values that explain at least 10% of the total variance (or raise the ICC above 0.10) are generally worth modeling.
+
+This model above shows that **participants differed in their average closeness**, with a random intercept variance of **0.6069**. The residual (within-person) variance was **1.7330**, suggesting that a lot of variability still exists within each participant across time or across friends. Within-person variance explains about **26% (ICC = .26)** percent of the variance.
+
+Let's see how that compares when we add a random intercept for within-friend differences.
+
+```{r}
+model_friendXparticipant <- lmer(H_closeFriend ~ 1 + (1|ID) + (1 | ID:H_FriendID_), data = FFH)
+summary(model_friendXparticipant)
+
+icc_fXp <- 0.1251647 / (0.1251647+0.5880710+1.6252385)
+```
+
+**We can see from our ICC calculation that there are some friend-level differences – that even for the same participant, some friends are consistently closer than others. And yet, given that this explains only about 6% of the variance, we should think carefully about including this in our model. So, let's compare both.**
+
+```{r}
+options(scipen=100)
+anova(model_participant, model_friendXparticipant)
+```
+
+Moving from 22511→22474 (AIC) and 22532→22501 (BIC) means the friend‐nested model fits better even after penalizing for the extra parameter.
+
+So, even though the friend‐level ICC was “small,” the formal test shows it significantly improves the model. We should therefore keep the friend‐level random intercept.
+
+-   `(1 | ID)` lets each participant have their own average closeness.
+
+-   `(1 | ID:H_FriendID_)` lets each friend (nested within a participant) also have their own average closeness.
+
+**Now, let's see if we should add any random slopes.** A natural next step is to let the **effect of Time vary by participant**, since some people may drift apart faster or slower than others. We can do that by adding a random slope for Time at the ID level:
+
+```{r}
+# random intercepts for friends, and random intercept + slope of Time for participants
+time_slope <- lmer(
+  H_closeFriend ~ 1 +
+    (1 + Time | ID) +
+    (1 | ID:H_FriendID_),
+  data = FFH
+)
+summary(time_slope)
+
+anova(model_participant, model_friendXparticipant, time_slope)
+```
+
+In our likelihood ratio rest and AIC comparison, we see a huge AIC drop (22474→18011) and highly significant LRT; allowing each participant to have their own Time‐trend dramatically improves the model.
+
+Theoretically, this still makes sense. By adding a random slope for Time, we're still allowing each participant to have their own trajectory of closeness over the four waves—instead of forcing everyone to change at the same average rate.
+
+-   Without a time slope: we assume the effect of going from Intake→Fall→Winter→Spring is identical for every person. Any real heterogeneity in trajectories gets lumped into the residual and can bias our time estimate or understate uncertainty.
+
+-   ***With*** a time slope: each person’s change‐over‐time is modeled explicitly. We capture “fast drifters” vs. “stable stayers,” we properly propagate that extra uncertainty into our fixed‐effect test of Time.
+
+## Fit Model
+
+Now let's fit our model. Below, we model...
+
+The effect of `Time` on closeness `H_closeFriend` with random effects.
+
+```{r}
+library(lmerTest)
+main_analysis <- lmer(
+H_closeFriend ~ Time +
+  (1 + Time | ID) +        # each participant has their own baseline closeness AND their own Time‐trend  
+  (1 | ID:H_FriendID_),    # each friendship (within participant) has its own baseline closeness
+  data = FFH)
+summary(main_analysis)
+```
+
+**We can see from this model that each time point is associated with a significant drop in closeness, even with our random effects.**
+
+## Visualize Model
+
+**Let's visualize the model to further our understanding.**
+
+```{r}
+library(emmeans)
+
+# 1a. Get estimated marginal means
+emm <- emmeans(main_analysis, ~ Time, pbkrtest.limit = 6462)
+
+# 1b. Turn into a data frame
+emm_df <- as.data.frame(emm)
+
+# 1c. Plot
+main_plot<- ggplot(emm_df, aes(x = Time, y = emmean)) +
+  geom_line(group = 1) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = lower.CL, ymax = upper.CL), width = .1) +
+  labs(
+    title = "Estimated Mean Closeness by Wave",
+    y = "Predicted Closeness (±95% CI)"
+  ) +
+  ylim(1,5)+
+  theme_classic()
+
+print(main_plot)
+
+```
+
+**Let's take a closer look at the random effects we've been modeling.**
+
+For that participant, we can now see how closeness to each friend rises or falls over the four waves—making the friend‐level variation explicit.
+
+```{r}
+# 1. Filter for one participant
+pid <- "211810"
+df_pid <- FFH %>% filter(ID == pid)
+
+# 2. Add model‐predicted closeness (including both random intercepts/slopes)
+df_pid <- df_pid %>%
+  mutate(pred = predict(main_analysis,
+                        newdata = .,
+                        re.form = ~(1 + Time | ID) + (1 | ID:H_FriendID_)))
+
+# 3. Plot each friend’s trajectory
+ggplot(df_pid, aes(x = Time, y = pred, group = H_FriendID_, color = H_FriendID_)) +
+  geom_line() +
+  geom_point() +
+  labs(title = paste0("Participant ", pid, ": \nFriend‐level Closeness Trajectories"),
+       y = "Predicted Closeness") +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+We can even take a look at 20 cases from our model to see how individual trajectories differ from the average trend. By randomly sampling 20 participants and plotting their fitted closeness over time (using their own intercepts and slopes), this “spaghetti” plot makes the heterogeneity in change visible—some people’s closeness remains high and stable, others decline sharply, and many show more gradual shifts. This visualization adds value by showing exactly what the random‐slope term captures: it turns a single fixed‐effect line into a cloud of subject‐specific lines, helping us judge whether the average Time effect truly represents our sample or masks important individual differences.
+
+```{r}
+# 2a. pick 20 random IDs
+set.seed(42)
+ids20 <- sample(unique(FFH$ID), 20)
+
+# 2b. augment data with fitted values
+df20 <- FFH %>%
+  filter(ID %in% ids20) %>%
+  mutate(
+    pred = predict(main_analysis,
+                   newdata = .,    # same data
+                   re.form = ~(1 + Time | ID))  # include participant randoms
+  )
+
+# 2c. plot
+ggplot(df20, aes(x = Time, y = pred, group = ID, color = ID)) +
+  geom_line() +
+  geom_point() +
+  labs(
+    title = "Subject‐specific Closeness Trajectories",
+    y = "Fitted Closeness"
+  ) +
+  theme_classic() +
+  theme(legend.position = "none")
+```
+
+**Amazing!**
+
+## Testing Model Validity Further
+
+Let's run a few more tests to be sure that our model is valid.
+
+Remember we had some abnormality as far as the normality of the distribution of our outcome variable. Let's see how this effects our model.
+
+What we see below is that in our normality test, the p-value \< 2.2×10⁻²² is astronomically small, so we have to reject the null hypothesis of “residuals are normally distributed.”
+
+**But** with such a large sample (n ≈ 6,462), even tiny departures can give very low p-values. It’s best to:
+
+1.  **Inspect a Q-Q plot** of the residuals to judge practical importance, and...
+
+2.  Remember that mixed models are fairly robust to modest normality violations—especially with balanced designs and large samples.
+
+In the QQ Plot below, we see that actually, our data follows the line of "normality" alright afterall, with a bit of heavier tails than a perfect normal—i.e. a few residuals are more extreme than you’d expect under strict normality.
+
+With \~6,500 observations, these mild deviations are common and usually not fatal for inference in a mixed model.
+
+```{r}
+library(nortest)
+lillie.test(residuals(main_analysis))
+
+# extract residuals
+res <- residuals(main_analysis)
+
+# Q–Q plot
+qqnorm(residuals(main_analysis))
+qqline(residuals(main_analysis), col = "blue", lwd = 2)
+
+```
+
+If that's the case – that we just have a few outliers influencing our model, let's take a look at the most influential obesrvations and see if our model changes as a result.
+
+We see many
+
+```{r}
+# install.packages("performance")
+library(performance)
+library(see)
+out <- check_outliers(main_analysis, "zscore_robust")
+print(out)
+
+check_autocorrelation(main_analysis)
+check_singularity(main_analysis)
+check_model(main_analysis)
+
+```
+
+```{r}
+#
+# linear mixed‐model
+# library(lme4)
+# mod_lm <- lmer(as.numeric(H_closeFriend) ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH)
+# AIC(mod_lm); BIC(mod_lm)
+# 
+# # ordinal mixed‐model -- can't do slopes so we removed sloeps from both models.??? 
+# library(ordinal)
+# mod_ord <- clmm(as.factor(H_closeFriend)       
+#             ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH, link="logit")
+# AIC(mod_ord, mod_lm, main_analysis); BIC(mod_ord, mod_lm, main_analysis)
+# 
+# theme_set(theme_classic(base_size = 6))
+# nominal_test(mod_ord)
+
+
+```
+
+```{r}
+
+```
 
 **Add in a moderator.**
 
 **Visualize.**
 
 **Compare.**
+
+**Conclusions and Wrap Up.**
 
 ```{r}
 print("hi")

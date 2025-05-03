@@ -188,15 +188,765 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<p>This is my blog post! Here’s a picture, too.</p>
+<section id="introduction-to-the-project" class="level1">
+<h1>Introduction to the Project</h1>
+<p>Hi, welcome to my first tutorial!</p>
+<p>Today, we’re going to be trying to understand how friendships change during the transition to college.</p>
+<p>But first, let’s load and install all of the packages we’ll need. Run the code below to install packages you may not already have.</p>
+<section id="install-and-load-packages" class="level2">
+<h2 class="anchored" data-anchor-id="install-and-load-packages">Install and Load Packages</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"hi"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#List of packages we'll use. </span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>packages <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"tidyverse"</span>,<span class="st">"dplyr"</span>, <span class="st">"lme4"</span>, <span class="st">"ggplot2"</span>, <span class="st">"readr"</span>,<span class="st">"naniar"</span>,<span class="st">"nortest"</span>)  </span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">#Identifies which packages you already have</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>install_if_missing <span class="ot">&lt;-</span> <span class="fu">setdiff</span>(packages, <span class="fu">rownames</span>(<span class="fu">installed.packages</span>()))</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co">#Installs packages you don't have</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">length</span>(install_if_missing)) <span class="fu">install.packages</span>(install_if_missing)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#Calls all needed packages </span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">lapply</span>(packages, library, <span class="at">character.only =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ purrr     1.0.4     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
+Loading required package: Matrix
+
+
+Attaching package: 'Matrix'
+
+
+The following objects are masked from 'package:tidyr':
+
+    expand, pack, unpack</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[[1]]
+ [1] "lubridate" "forcats"   "stringr"   "dplyr"     "purrr"     "readr"    
+ [7] "tidyr"     "tibble"    "ggplot2"   "tidyverse" "stats"     "graphics" 
+[13] "grDevices" "utils"     "datasets"  "methods"   "base"     
+
+[[2]]
+ [1] "lubridate" "forcats"   "stringr"   "dplyr"     "purrr"     "readr"    
+ [7] "tidyr"     "tibble"    "ggplot2"   "tidyverse" "stats"     "graphics" 
+[13] "grDevices" "utils"     "datasets"  "methods"   "base"     
+
+[[3]]
+ [1] "lme4"      "Matrix"    "lubridate" "forcats"   "stringr"   "dplyr"    
+ [7] "purrr"     "readr"     "tidyr"     "tibble"    "ggplot2"   "tidyverse"
+[13] "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"  
+[19] "base"     
+
+[[4]]
+ [1] "lme4"      "Matrix"    "lubridate" "forcats"   "stringr"   "dplyr"    
+ [7] "purrr"     "readr"     "tidyr"     "tibble"    "ggplot2"   "tidyverse"
+[13] "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"  
+[19] "base"     
+
+[[5]]
+ [1] "lme4"      "Matrix"    "lubridate" "forcats"   "stringr"   "dplyr"    
+ [7] "purrr"     "readr"     "tidyr"     "tibble"    "ggplot2"   "tidyverse"
+[13] "stats"     "graphics"  "grDevices" "utils"     "datasets"  "methods"  
+[19] "base"     
+
+[[6]]
+ [1] "naniar"    "lme4"      "Matrix"    "lubridate" "forcats"   "stringr"  
+ [7] "dplyr"     "purrr"     "readr"     "tidyr"     "tibble"    "ggplot2"  
+[13] "tidyverse" "stats"     "graphics"  "grDevices" "utils"     "datasets" 
+[19] "methods"   "base"     
+
+[[7]]
+ [1] "nortest"   "naniar"    "lme4"      "Matrix"    "lubridate" "forcats"  
+ [7] "stringr"   "dplyr"     "purrr"     "readr"     "tidyr"     "tibble"   
+[13] "ggplot2"   "tidyverse" "stats"     "graphics"  "grDevices" "utils"    
+[19] "datasets"  "methods"   "base"     </code></pre>
+</div>
+</div>
+<p>Great! Now let’s load our data from GitHub.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="st">"https://raw.githubusercontent.com/madpax-csv/madpax-does-stats/refs/heads/master/wNAs_FourWaves_FTlevel.csv"</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: One or more parsing issues, call `problems()` on your data frame for details,
+e.g.:
+  dat &lt;- vroom(...)
+  problems(dat)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Rows: 8064 Columns: 169
+── Column specification ────────────────────────────────────────────────────────
+Delimiter: ","
+chr   (6): gender_FR, race_FR, distance_mi_cats, race_cat, H_FriendID_, Time
+dbl (157): ID, over18, inFSI, age, gender, transgender, international, frien...
+num   (3): race, selectHomeFriend, listPton
+lgl   (3): loneliness, winterPlan, composite_Lon_Men
+
+ℹ Use `spec()` to retrieve the full column specification for this data.
+ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#You may get an error about parsing issues, but it looks normal to me... </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Explain dataset.</strong></p>
+<p>The Adversity and Close Relationships Lab surveyed students about their friendships at four different time points throughout their first year of college.</p>
+<p>In the summer (<strong>Intake</strong>) before they moved on campus, we asked them to list up to 7 current friends and how close they are to each friend, how long they’ve been friends, and whether this friend is in college.</p>
+<p>Then, in the Fall, Winter, and Spring, we asked if they still consider this person a friend. If they do, we then ask about how close they are to that friend now. (We do not ask about length of friendship or college enrollment for these friends again.)</p>
+<p>We are using a few key variables:</p>
+<ul>
+<li><p><strong><code>ID</code>:</strong> This is a given surveyed participants’ unique ID number.</p></li>
+<li><p><strong><code>Time</code>:</strong> This refers to the time point at which responses were given (i.e., Intake, Fall, Winter, Spring).</p></li>
+<li><p><strong><code>H_FriendID_</code>:</strong> This is a unique ID for each friend that a participant listed.</p></li>
+<li><p><strong><code>H_closeFriend</code>:</strong> This refers to how close a participant rated a friend at a given timepoint.</p>
+<ul>
+<li>1 = Not At All Close; 5 = Extremely Close</li>
+</ul></li>
+</ul>
+<p>We may also look at a few controls and moderators, which I will include in our dataset for now, and will explain later when we come to it.</p>
+<p>Before we dive in, let’s widdle down our dataset <strong>FFH (friends from home)</strong> to make it easier to explore. We’ll also quickly ensure the data types are appropriate.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Main variables of interest</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    ID, Time, H_FriendID_, H_closeFriend,</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Potential Moderators</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    H_Friend_college,</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">#For Filtering</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    H_friend_in_Net) <span class="sc">%&gt;%</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">ID =</span> <span class="fu">as.character</span>(ID),</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">Time =</span> <span class="fu">factor</span>(Time, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"Intake"</span>, <span class="st">"Fall"</span>, <span class="st">"Winter"</span>, <span class="st">"Spring"</span>)),</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">H_FriendID_ =</span> <span class="fu">as.character</span>(H_FriendID_),</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">H_closeFriend =</span> <span class="fu">as.numeric</span>(H_closeFriend),</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">H_Friend_college =</span> <span class="fu">factor</span>(H_Friend_college, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))  )</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(ID, H_FriendID_, <span class="fu">everything</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Walk through dataset and its structure.</strong></p>
+<p><strong>Our data is at the Friend/Time level. This means that each row represents how our participant thought of a friend at a given timepoint.</strong></p>
+<p>Below, you can print an example of how one participant responded about one friend at each timepoint. Notice how the ID and the Friend ID are both the same in each row, but the time point differs.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>structure_ex <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ID <span class="sc">==</span> <span class="st">"211810"</span> <span class="sc">&amp;</span> H_FriendID_ <span class="sc">==</span> <span class="st">"1"</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(structure_ex)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 6
+  ID     H_FriendID_ Time   H_closeFriend H_Friend_college H_friend_in_Net
+  &lt;chr&gt;  &lt;chr&gt;       &lt;fct&gt;          &lt;dbl&gt; &lt;fct&gt;                      &lt;dbl&gt;
+1 211810 1           Intake             5 1                              1
+2 211810 1           Fall               5 1                              1
+3 211810 1           Winter             3 1                              1
+4 211810 1           Spring             4 1                              1</code></pre>
+</div>
+</div>
+<p>Let’s look at all of the friends this participant listed to better understand the structure of the data.</p>
+<p>You’ll notice that each Participant (<strong>ID</strong>) has at least one friend (<strong>H_FriendID_</strong>) and for each friend, there is a time point (<strong>Time</strong>). In other words…</p>
+<p><strong>Participant (<code>ID</code>) → Friend (<code>H_FriendID_</code>) → Time point (<code>Time</code>)</strong></p>
+<p>Level 1: Repeated measurements (e.g., closeness over time)</p>
+<p>Level 2: Friend-level variables (e.g., how long they’ve known each friend)</p>
+<p>Level 3: Participant-level variables (e.g., age, inFSI)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>structure_ex2 <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ID <span class="sc">==</span> <span class="st">"211810"</span>)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(structure_ex2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 28 × 6
+   ID     H_FriendID_ Time   H_closeFriend H_Friend_college H_friend_in_Net
+   &lt;chr&gt;  &lt;chr&gt;       &lt;fct&gt;          &lt;dbl&gt; &lt;fct&gt;                      &lt;dbl&gt;
+ 1 211810 1           Intake             5 1                              1
+ 2 211810 1           Fall               5 1                              1
+ 3 211810 1           Winter             3 1                              1
+ 4 211810 1           Spring             4 1                              1
+ 5 211810 320         Intake             5 1                              1
+ 6 211810 320         Fall               5 1                              1
+ 7 211810 320         Winter             5 1                              1
+ 8 211810 320         Spring             4 1                              1
+ 9 211810 634         Intake             4 1                              1
+10 211810 634         Fall               3 1                              1
+# ℹ 18 more rows</code></pre>
+</div>
+</div>
+<p>Let’s take a glimpse at our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(FFH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 8,064
+Columns: 6
+$ ID               &lt;chr&gt; "211810", "211810", "211810", "211810", "211810", "21…
+$ H_FriendID_      &lt;chr&gt; "1", "1", "1", "1", "320", "320", "320", "320", "634"…
+$ Time             &lt;fct&gt; Intake, Fall, Winter, Spring, Intake, Fall, Winter, S…
+$ H_closeFriend    &lt;dbl&gt; 5, 5, 3, 4, 5, 5, 5, 4, 4, 3, NA, NA, 3, 3, NA, NA, N…
+$ H_Friend_college &lt;fct&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, NA, N…
+$ H_friend_in_Net  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, NA, N…</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_var</span>(FFH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>You might notice that while we have very few missing values for participant-level variables like age, there are many more missing values for friend-related variables. These missing values arise for two main reasons:</p>
+<ol type="1">
+<li><p><strong>Not all participants listed 7 friends</strong> during the Intake survey—some listed fewer, leaving empty friend slots for information about closeness etc.</p></li>
+<li><p><strong>Not all friends were still considered friends</strong> at each time point (Fall, Winter, Spring), so their closeness ratings are missing for those waves</p></li>
+</ol>
+<p>Let’s address each of these points. Luckily, in another file, our data has already noted when a participant hasn’t listed someone in a given slot. So we are going to remove those slots where no one was listed. Let’s see the effect that this had.</p>
+<p>We can see that those questions that were ONLY asked in Intake are now only missing for 5 participants – and we can assume that 5 people skipped one of those questions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(H_FriendID_ <span class="sc">!=</span> <span class="st">"none listed"</span>)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="fu">gg_miss_var</span>(FFH)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>why <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(H_Friend_college))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(why<span class="sc">$</span>ID)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 5</code></pre>
+</div>
+</div>
+<p>When a person listed as a friend at Intake is no longer named in Fall, Winter, or Spring, their closeness rating is left missing by default. However, this missingness is meaningful—it reflects the potential loss of a friendship, which is theoretically important. Rather than removing these cases, we recode their missing closeness values to 1, representing “Not at all close” on our scale. This allows us to retain these friends in the dataset and interpret their absence as a signal of relationship deterioration.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">H_closeFriend =</span> <span class="fu">if_else</span>(H_friend_in_Net <span class="sc">==</span> <span class="dv">0</span>, <span class="dv">1</span>, H_closeFriend))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>At this stage, any remaining missing values reflect questions that participants skipped. For simplicity, we’ll remove those cases. (Not really the main point of this tutorial)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>FFH <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">drop_na</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s take a quick look at more information about our data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>n_participants <span class="ot">&lt;-</span> <span class="fu">n_distinct</span>(FFH<span class="sc">$</span>ID)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Number of unique participants:"</span>, n_participants))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Number of unique participants: 283"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>n_friends <span class="ot">&lt;-</span> <span class="fu">n_distinct</span>(FFH<span class="sc">$</span>H_FriendID_)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">paste</span>(<span class="st">"Number of unique friends listed:"</span>, n_friends))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "Number of unique friends listed: 1594"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>FFH <span class="sc">%&gt;%</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> H_closeFriend)) <span class="sc">+</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">1</span>, <span class="at">fill =</span> <span class="st">"steelblue"</span>, <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">boundary =</span> <span class="dv">0</span>) <span class="sc">+</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Time) <span class="sc">+</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Histogram of Closeness by Timepoint"</span>,</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Closeness (1 = Not at all close, 5 = Extremely close)"</span>,</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Count"</span>) <span class="sc">+</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">panel.grid =</span> <span class="fu">element_blank</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lillie.test</span>(FFH<span class="sc">$</span>H_closeFriend)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Lilliefors (Kolmogorov-Smirnov) normality test
+
+data:  FFH$H_closeFriend
+D = 0.19051, p-value &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<p><strong>So, we have 288 participants and 1,617 unique friends listed. In the table, you’ll see a breakdown of closeness at each time point. These histograms, plus a quick test of normality, show that our outcome is not normally distributed. But, it’s worth making our model and then investigating once the model is set.</strong></p>
+<p><strong>Now that we know what we’re working with, we can start to decipher a model to investigate our research question:</strong></p>
+<p>What is the effect of Time on Closeness to friends from home?</p>
+<p>Because of the nested nature of this data, our biggest contender is a mixed linear regression.</p>
+<p>A mixed linear model (also called a multilevel or hierarchical linear model) is a type of regression that accounts for nested or grouped data.</p>
+<p>In our case, closeness ratings are repeated over time within each friend, and each friend is nested within a participant. This violates the assumption of independence in traditional linear regression, because observations from the same person or the same friendship are likely to be more similar to each other than to those from others. A mixed linear regression is ideal here because it allows us to model both fixed effects (like time) and random effects (like variation across participants and friendships). This helps us better understand the average trends while also accounting for individual differences in how close someone feels to their friends in general.</p>
+<p>But first, we need to check a few assumptions to make sure this is the right model for us.</p>
+</section>
+</section>
+<section id="checking-assumptions" class="level1">
+<h1>Checking Assumptions</h1>
+<p>Let’s see that our outcome variables is roughly normally distributed.</p>
+<p>Before fitting a mixed model, it’s good practice to check whether the <strong>outcome variable</strong> is approximately normally distributed. For larger samples, <code>lillie.test()</code> from the <code>nortest</code> package is a more appropriate option. Still, these tests are sensitive — so it’s just as important to visually inspect the data using a histogram or a Q-Q plot. In our case, the closeness variable is on a 1–5 ordinal scale and shows a skewed, multimodal distribution, especially with a spike at “1” due to our recoding. This outcome isn’t normally distributed, which we expected. That’s okay: normality is more important for model <strong>residuals</strong>, which we’ll check after fitting the model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(FFH<span class="sc">$</span>H_closeFriend)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(FFH<span class="sc">$</span>H_closeFriend[FFH<span class="sc">$</span>Time<span class="sc">==</span><span class="st">"Intake"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-11-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(FFH<span class="sc">$</span>H_closeFriend[FFH<span class="sc">$</span>Time<span class="sc">==</span><span class="st">"Fall"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-11-3.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(FFH<span class="sc">$</span>H_closeFriend[FFH<span class="sc">$</span>Time<span class="sc">==</span><span class="st">"Winter"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-11-4.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">hist</span>(FFH<span class="sc">$</span>H_closeFriend[FFH<span class="sc">$</span>Time<span class="sc">==</span><span class="st">"Spring"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-11-5.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We’ll see how this plays out.</p>
+<p>Next, we’re going to decide how to structure our model and whether we want to include random intercepts, random slopes, or both.</p>
+<p><strong>Random Intercepts</strong></p>
+<p>A <strong>random intercept</strong> allows each group (e.g., each participant or each friend) to have their own baseline level of the outcome (e.g., closeness). This is a good place to start when your data includes repeated measures or clustering.</p>
+<p>In our case, we’re measuring closeness to multiple friends over time, with friends nested within participants. So we could include:</p>
+<ul>
+<li><p>A random intercept for Participant ID, to account for differences in overall closeness across people</p></li>
+<li><p>A random intercept for Friend ID, to account for some friends being consistently rated higher or lower than others</p></li>
+</ul>
+<p>Let’s make sure that it <strong>makes sense</strong> to have random intercept for these. We do this by looking at the variance in our outcome variable <code>H_closeFriend</code> within each of these levels.</p>
+<p>We’ll start with a random intercept for <code>ID</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>model_participant <span class="ot">&lt;-</span> <span class="fu">lmer</span>(H_closeFriend <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID), <span class="at">data =</span> FFH)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract variance components from the model</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>var_components <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">VarCorr</span>(model_participant))</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute total variance</span></span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>total_variance <span class="ot">&lt;-</span> <span class="fu">sum</span>(var_components<span class="sc">$</span>vcov)</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate proportion of variance at each level</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>var_components<span class="sc">$</span>proportion <span class="ot">&lt;-</span> var_components<span class="sc">$</span>vcov <span class="sc">/</span> total_variance</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Show proportions in a readable table</span></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>var_components[, <span class="fu">c</span>(<span class="st">"grp"</span>, <span class="st">"vcov"</span>, <span class="st">"proportion"</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       grp      vcov proportion
+1       ID 0.5996095   0.257216
+2 Residual 1.7315418   0.742784</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># For participant-level ICC (model_participant)</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>icc <span class="ot">&lt;-</span> <span class="fl">0.6069</span> <span class="sc">/</span> (<span class="fl">0.6069</span> <span class="sc">+</span> <span class="fl">1.7330</span>)  <span class="co"># ≈ 0.26</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There’s no strict cutoff for what counts as “high” random effect variance, but values that explain at least 10% of the total variance (or raise the ICC above 0.10) are generally worth modeling.</p>
+<p>This model above shows that <strong>participants differed in their average closeness</strong>, with a random intercept variance of <strong>0.6069</strong>. The residual (within-person) variance was <strong>1.7330</strong>, suggesting that a lot of variability still exists within each participant across time or across friends. Within-person variance explains about <strong>26% (ICC = .26)</strong> percent of the variance.</p>
+<p>Let’s see how that compares when we add a random intercept for within-friend differences.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>model_friendXparticipant <span class="ot">&lt;-</span> <span class="fu">lmer</span>(H_closeFriend <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span><span class="sc">|</span>ID) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID<span class="sc">:</span>H_FriendID_), <span class="at">data =</span> FFH)</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model_friendXparticipant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: H_closeFriend ~ 1 + (1 | ID) + (1 | ID:H_FriendID_)
+   Data: FFH
+
+REML criterion at convergence: 22138.8
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-2.43035 -0.73437  0.02939  0.68168  2.53314 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ ID:H_FriendID_ (Intercept) 0.1285   0.3584  
+ ID             (Intercept) 0.5802   0.7617  
+ Residual                   1.6209   1.2731  
+Number of obs: 6370, groups:  ID:H_FriendID_, 1594; ID, 283
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)  3.03205    0.04928   61.53</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>icc_fXp <span class="ot">&lt;-</span> <span class="fl">0.1251647</span> <span class="sc">/</span> (<span class="fl">0.1251647+0.5880710+1.6252385</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>We can see from our ICC calculation that there are some friend-level differences – that even for the same participant, some friends are consistently closer than others. And yet, given that this explains only about 6% of the variance, we should think carefully about including this in our model. So, let’s compare both.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">scipen=</span><span class="dv">100</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_participant, model_friendXparticipant)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>refitting model(s) with ML (instead of REML)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data: FFH
+Models:
+model_participant: H_closeFriend ~ 1 + (1 | ID)
+model_friendXparticipant: H_closeFriend ~ 1 + (1 | ID) + (1 | ID:H_FriendID_)
+                         npar   AIC   BIC logLik -2*log(L)  Chisq Df
+model_participant           3 22182 22202 -11088     22176          
+model_friendXparticipant    4 22143 22170 -11067     22135 40.993  1
+                              Pr(&gt;Chisq)    
+model_participant                           
+model_friendXparticipant 0.0000000001528 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>Moving from 22511→22474 (AIC) and 22532→22501 (BIC) means the friend‐nested model fits better even after penalizing for the extra parameter.</p>
+<p>So, even though the friend‐level ICC was “small,” the formal test shows it significantly improves the model. We should therefore keep the friend‐level random intercept.</p>
+<ul>
+<li><p><code>(1 | ID)</code> lets each participant have their own average closeness.</p></li>
+<li><p><code>(1 | ID:H_FriendID_)</code> lets each friend (nested within a participant) also have their own average closeness.</p></li>
+</ul>
+<p><strong>Now, let’s see if we should add any random slopes.</strong> A natural next step is to let the <strong>effect of Time vary by participant</strong>, since some people may drift apart faster or slower than others. We can do that by adding a random slope for Time at the ID level:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># random intercepts for friends, and random intercept + slope of Time for participants</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>time_slope <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  H_closeFriend <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">+</span> Time <span class="sc">|</span> ID) <span class="sc">+</span></span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>    (<span class="dv">1</span> <span class="sc">|</span> ID<span class="sc">:</span>H_FriendID_),</span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> FFH</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(time_slope)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML ['lmerMod']
+Formula: H_closeFriend ~ 1 + (1 + Time | ID) + (1 | ID:H_FriendID_)
+   Data: FFH
+
+REML criterion at convergence: 17891.2
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-3.9401 -0.4188 -0.0023  0.4700  3.8316 
+
+Random effects:
+ Groups         Name        Variance Std.Dev. Corr          
+ ID:H_FriendID_ (Intercept) 0.5194   0.7207                 
+ ID             (Intercept) 0.0000   0.0000                 
+                TimeFall    2.6579   1.6303    NaN          
+                TimeWinter  3.0615   1.7497    NaN 0.76     
+                TimeSpring  3.8124   1.9525    NaN 0.70 0.84
+ Residual                   0.4372   0.6612                 
+Number of obs: 6370, groups:  ID:H_FriendID_, 1594; ID, 283
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept)  3.97154    0.02433   163.2
+optimizer (nloptwrap) convergence code: 0 (OK)
+boundary (singular) fit: see help('isSingular')</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(model_participant, model_friendXparticipant, time_slope)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>refitting model(s) with ML (instead of REML)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Data: FFH
+Models:
+model_participant: H_closeFriend ~ 1 + (1 | ID)
+model_friendXparticipant: H_closeFriend ~ 1 + (1 | ID) + (1 | ID:H_FriendID_)
+time_slope: H_closeFriend ~ 1 + (1 + Time | ID) + (1 | ID:H_FriendID_)
+                         npar   AIC   BIC   logLik -2*log(L)    Chisq Df
+model_participant           3 22182 22202 -11087.8     22176            
+model_friendXparticipant    4 22143 22170 -11067.3     22135   40.993  1
+time_slope                 13 17912 18000  -8942.8     17886 4248.999  9
+                                    Pr(&gt;Chisq)    
+model_participant                                 
+model_friendXparticipant       0.0000000001528 ***
+time_slope               &lt; 0.00000000000000022 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</code></pre>
+</div>
+</div>
+<p>In our likelihood ratio rest and AIC comparison, we see a huge AIC drop (22474→18011) and highly significant LRT; allowing each participant to have their own Time‐trend dramatically improves the model.</p>
+<p>Theoretically, this still makes sense. By adding a random slope for Time, we’re still allowing each participant to have their own trajectory of closeness over the four waves—instead of forcing everyone to change at the same average rate.</p>
+<ul>
+<li><p>Without a time slope: we assume the effect of going from Intake→Fall→Winter→Spring is identical for every person. Any real heterogeneity in trajectories gets lumped into the residual and can bias our time estimate or understate uncertainty.</p></li>
+<li><p><strong><em>With</em></strong> a time slope: each person’s change‐over‐time is modeled explicitly. We capture “fast drifters” vs.&nbsp;“stable stayers,” we properly propagate that extra uncertainty into our fixed‐effect test of Time.</p></li>
+</ul>
+<section id="fit-model" class="level2">
+<h2 class="anchored" data-anchor-id="fit-model">Fit Model</h2>
+<p>Now let’s fit our model. Below, we model…</p>
+<p>The effect of <code>Time</code> on closeness <code>H_closeFriend</code> with random effects.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lmerTest)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'lmerTest'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:lme4':
+
+    lmer</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:stats':
+
+    step</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>main_analysis <span class="ot">&lt;-</span> <span class="fu">lmer</span>(</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>H_closeFriend <span class="sc">~</span> Time <span class="sc">+</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">+</span> Time <span class="sc">|</span> ID) <span class="sc">+</span>        <span class="co"># each participant has their own baseline closeness AND their own Time‐trend  </span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">|</span> ID<span class="sc">:</span>H_FriendID_),    <span class="co"># each friendship (within participant) has its own baseline closeness</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> FFH)</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(main_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Linear mixed model fit by REML. t-tests use Satterthwaite's method [
+lmerModLmerTest]
+Formula: H_closeFriend ~ Time + (1 + Time | ID) + (1 | ID:H_FriendID_)
+   Data: FFH
+
+REML criterion at convergence: 17480
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-4.0237 -0.4102 -0.0027  0.4434  3.9172 
+
+Random effects:
+ Groups         Name        Variance Std.Dev. Corr             
+ ID:H_FriendID_ (Intercept) 0.4267   0.6532                    
+ ID             (Intercept) 0.2074   0.4554                    
+                TimeFall    1.7141   1.3093   -0.22            
+                TimeWinter  1.5641   1.2507   -0.39  0.61      
+                TimeSpring  1.5153   1.2310   -0.30  0.47  0.65
+ Residual                   0.4244   0.6514                    
+Number of obs: 6370, groups:  ID:H_FriendID_, 1594; ID, 283
+
+Fixed effects:
+             Estimate Std. Error        df t value            Pr(&gt;|t|)    
+(Intercept)   4.00413    0.03608 275.77176  110.99 &lt;0.0000000000000002 ***
+TimeFall     -1.02991    0.08161 279.20311  -12.62 &lt;0.0000000000000002 ***
+TimeWinter   -1.30645    0.07836 277.60357  -16.67 &lt;0.0000000000000002 ***
+TimeSpring   -1.56769    0.07717 279.89139  -20.31 &lt;0.0000000000000002 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Correlation of Fixed Effects:
+           (Intr) TimFll TmWntr
+TimeFall   -0.253              
+TimeWinter -0.378  0.596       
+TimeSpring -0.316  0.472  0.632</code></pre>
+</div>
+</div>
+<p><strong>We can see from this model that each time point is associated with a significant drop in closeness, even with our random effects.</strong></p>
+</section>
+<section id="visualize-model" class="level2">
+<h2 class="anchored" data-anchor-id="visualize-model">Visualize Model</h2>
+<p><strong>Let’s visualize the model to further our understanding.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(emmeans)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Welcome to emmeans.
+Caution: You lose important information if you filter this package's results.
+See '? untidy'</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1a. Get estimated marginal means</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>emm <span class="ot">&lt;-</span> <span class="fu">emmeans</span>(main_analysis, <span class="sc">~</span> Time, <span class="at">pbkrtest.limit =</span> <span class="dv">6462</span>)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 1b. Turn into a data frame</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>emm_df <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(emm)</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 1c. Plot</span></span>
+<span id="cb57-8"><a href="#cb57-8" aria-hidden="true" tabindex="-1"></a>main_plot<span class="ot">&lt;-</span> <span class="fu">ggplot</span>(emm_df, <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> emmean)) <span class="sc">+</span></span>
+<span id="cb57-9"><a href="#cb57-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="at">group =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb57-10"><a href="#cb57-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb57-11"><a href="#cb57-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> lower.CL, <span class="at">ymax =</span> upper.CL), <span class="at">width =</span> .<span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb57-12"><a href="#cb57-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb57-13"><a href="#cb57-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Estimated Mean Closeness by Wave"</span>,</span>
+<span id="cb57-14"><a href="#cb57-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Predicted Closeness (±95% CI)"</span></span>
+<span id="cb57-15"><a href="#cb57-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb57-16"><a href="#cb57-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="dv">1</span>,<span class="dv">5</span>)<span class="sc">+</span></span>
+<span id="cb57-17"><a href="#cb57-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>()</span>
+<span id="cb57-18"><a href="#cb57-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-19"><a href="#cb57-19" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(main_plot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Let’s take a closer look at the random effects we’ve been modeling.</strong></p>
+<p>For that participant, we can now see how closeness to each friend rises or falls over the four waves—making the friend‐level variation explicit.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Filter for one participant</span></span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>pid <span class="ot">&lt;-</span> <span class="st">"211810"</span></span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>df_pid <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span> <span class="fu">filter</span>(ID <span class="sc">==</span> pid)</span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Add model‐predicted closeness (including both random intercepts/slopes)</span></span>
+<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>df_pid <span class="ot">&lt;-</span> df_pid <span class="sc">%&gt;%</span></span>
+<span id="cb58-7"><a href="#cb58-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pred =</span> <span class="fu">predict</span>(main_analysis,</span>
+<span id="cb58-8"><a href="#cb58-8" aria-hidden="true" tabindex="-1"></a>                        <span class="at">newdata =</span> .,</span>
+<span id="cb58-9"><a href="#cb58-9" aria-hidden="true" tabindex="-1"></a>                        <span class="at">re.form =</span> <span class="sc">~</span>(<span class="dv">1</span> <span class="sc">+</span> Time <span class="sc">|</span> ID) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> ID<span class="sc">:</span>H_FriendID_)))</span>
+<span id="cb58-10"><a href="#cb58-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb58-11"><a href="#cb58-11" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Plot each friend’s trajectory</span></span>
+<span id="cb58-12"><a href="#cb58-12" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_pid, <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> pred, <span class="at">group =</span> H_FriendID_, <span class="at">color =</span> H_FriendID_)) <span class="sc">+</span></span>
+<span id="cb58-13"><a href="#cb58-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb58-14"><a href="#cb58-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb58-15"><a href="#cb58-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="fu">paste0</span>(<span class="st">"Participant "</span>, pid, <span class="st">": </span><span class="sc">\n</span><span class="st">Friend‐level Closeness Trajectories"</span>),</span>
+<span id="cb58-16"><a href="#cb58-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Predicted Closeness"</span>) <span class="sc">+</span></span>
+<span id="cb58-17"><a href="#cb58-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb58-18"><a href="#cb58-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can even take a look at 20 cases from our model to see how individual trajectories differ from the average trend. By randomly sampling 20 participants and plotting their fitted closeness over time (using their own intercepts and slopes), this “spaghetti” plot makes the heterogeneity in change visible—some people’s closeness remains high and stable, others decline sharply, and many show more gradual shifts. This visualization adds value by showing exactly what the random‐slope term captures: it turns a single fixed‐effect line into a cloud of subject‐specific lines, helping us judge whether the average Time effect truly represents our sample or masks important individual differences.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 2a. pick 20 random IDs</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>ids20 <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">unique</span>(FFH<span class="sc">$</span>ID), <span class="dv">20</span>)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 2b. augment data with fitted values</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>df20 <span class="ot">&lt;-</span> FFH <span class="sc">%&gt;%</span></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(ID <span class="sc">%in%</span> ids20) <span class="sc">%&gt;%</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">pred =</span> <span class="fu">predict</span>(main_analysis,</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>                   <span class="at">newdata =</span> .,    <span class="co"># same data</span></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>                   <span class="at">re.form =</span> <span class="sc">~</span>(<span class="dv">1</span> <span class="sc">+</span> Time <span class="sc">|</span> ID))  <span class="co"># include participant randoms</span></span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a><span class="co"># 2c. plot</span></span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df20, <span class="fu">aes</span>(<span class="at">x =</span> Time, <span class="at">y =</span> pred, <span class="at">group =</span> ID, <span class="at">color =</span> ID)) <span class="sc">+</span></span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span></span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb59-19"><a href="#cb59-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Subject‐specific Closeness Trajectories"</span>,</span>
+<span id="cb59-20"><a href="#cb59-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Fitted Closeness"</span></span>
+<span id="cb59-21"><a href="#cb59-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb59-22"><a href="#cb59-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_classic</span>() <span class="sc">+</span></span>
+<span id="cb59-23"><a href="#cb59-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-19-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Amazing!</strong></p>
+</section>
+<section id="testing-model-validity-further" class="level2">
+<h2 class="anchored" data-anchor-id="testing-model-validity-further">Testing Model Validity Further</h2>
+<p>Let’s run a few more tests to be sure that our model is valid.</p>
+<p>Remember we had some abnormality as far as the normality of the distribution of our outcome variable. Let’s see how this effects our model.</p>
+<p>What we see below is that in our normality test, the p-value &lt; 2.2×10⁻²² is astronomically small, so we have to reject the null hypothesis of “residuals are normally distributed.”</p>
+<p><strong>But</strong> with such a large sample (n ≈ 6,462), even tiny departures can give very low p-values. It’s best to:</p>
+<ol type="1">
+<li><p><strong>Inspect a Q-Q plot</strong> of the residuals to judge practical importance, and…</p></li>
+<li><p>Remember that mixed models are fairly robust to modest normality violations—especially with balanced designs and large samples.</p></li>
+</ol>
+<p>In the QQ Plot below, we see that actually, our data follows the line of “normality” alright afterall, with a bit of heavier tails than a perfect normal—i.e.&nbsp;a few residuals are more extreme than you’d expect under strict normality.</p>
+<p>With ~6,500 observations, these mild deviations are common and usually not fatal for inference in a mixed model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(nortest)</span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a><span class="fu">lillie.test</span>(<span class="fu">residuals</span>(main_analysis))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Lilliefors (Kolmogorov-Smirnov) normality test
+
+data:  residuals(main_analysis)
+D = 0.061099, p-value &lt; 0.00000000000000022</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract residuals</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">residuals</span>(main_analysis)</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Q–Q plot</span></span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="fu">qqnorm</span>(<span class="fu">residuals</span>(main_analysis))</span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a><span class="fu">qqline</span>(<span class="fu">residuals</span>(main_analysis), <span class="at">col =</span> <span class="st">"blue"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>If that’s the case – that we just have a few outliers influencing our model, let’s take a look at the most influential obesrvations and see if our model changes as a result.</p>
+<p>We see many</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("performance")</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(performance)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(see)</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">check_outliers</span>(main_analysis, <span class="st">"zscore_robust"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Converting missing values (`NA`) into regular values currently not
+  possible for variables of class `NULL`.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(out)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>OK: No outliers detected.
+- Based on the following method and threshold: zscore_robust (3.291).
+- For variable: (Whole model)</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_autocorrelation</span>(main_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Warning: Autocorrelated residuals detected (p &lt; .001).</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_singularity</span>(main_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">check_model</span>(main_analysis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="tut_index_files/figure-html/unnamed-chunk-21-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a><span class="co"># linear mixed‐model</span></span>
+<span id="cb72-3"><a href="#cb72-3" aria-hidden="true" tabindex="-1"></a><span class="co"># library(lme4)</span></span>
+<span id="cb72-4"><a href="#cb72-4" aria-hidden="true" tabindex="-1"></a><span class="co"># mod_lm &lt;- lmer(as.numeric(H_closeFriend) ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH)</span></span>
+<span id="cb72-5"><a href="#cb72-5" aria-hidden="true" tabindex="-1"></a><span class="co"># AIC(mod_lm); BIC(mod_lm)</span></span>
+<span id="cb72-6"><a href="#cb72-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb72-7"><a href="#cb72-7" aria-hidden="true" tabindex="-1"></a><span class="co"># # ordinal mixed‐model -- can't do slopes so we removed sloeps from both models.??? </span></span>
+<span id="cb72-8"><a href="#cb72-8" aria-hidden="true" tabindex="-1"></a><span class="co"># library(ordinal)</span></span>
+<span id="cb72-9"><a href="#cb72-9" aria-hidden="true" tabindex="-1"></a><span class="co"># mod_ord &lt;- clmm(as.factor(H_closeFriend)       </span></span>
+<span id="cb72-10"><a href="#cb72-10" aria-hidden="true" tabindex="-1"></a><span class="co">#             ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH, link="logit")</span></span>
+<span id="cb72-11"><a href="#cb72-11" aria-hidden="true" tabindex="-1"></a><span class="co"># AIC(mod_ord, mod_lm, main_analysis); BIC(mod_ord, mod_lm, main_analysis)</span></span>
+<span id="cb72-12"><a href="#cb72-12" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb72-13"><a href="#cb72-13" aria-hidden="true" tabindex="-1"></a><span class="co"># theme_set(theme_classic(base_size = 6))</span></span>
+<span id="cb72-14"><a href="#cb72-14" aria-hidden="true" tabindex="-1"></a><span class="co"># nominal_test(mod_ord)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Add in a moderator.</strong></p>
+<p><strong>Visualize.</strong></p>
+<p><strong>Compare.</strong></p>
+<p><strong>Conclusions and Wrap Up.</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="st">"hi"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "hi"</code></pre>
 </div>
 </div>
 
 
+</section>
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
