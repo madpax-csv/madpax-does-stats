@@ -1,0 +1,15 @@
+{
+  "hash": "0e7607ad55e7d0e0df32dcb3c377f157",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Tutorial\"\noutput-dir: docs\nauthor: \"Maddy Paxson\"\ndate: \"2025-05-02\"\ncategories: [research]\n---\n\n\n\nThis is my blog post! Here's a picture, too.\n\n\n\n::: {.cell}\n\n```{.r .cell-code}\nprint(\"hi\")\n```\n\n::: {.cell-output .cell-output-stdout}\n\n```\n[1] \"hi\"\n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

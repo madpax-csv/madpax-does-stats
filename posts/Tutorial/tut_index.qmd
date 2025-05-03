@@ -1,0 +1,204 @@
+---
+title: "Tutorial"
+output-dir: docs
+author: "Maddy Paxson"
+date: "2025-05-02"
+categories: [research]
+---
+
+# Introduction to the Project
+
+Hi, welcome to my first tutorial!
+
+Today, we're going to be trying to understand how friendships change during the transition to college.
+
+But first, let's load and install all of the packages we'll need. Run the code below to install packages you may not already have.
+
+## Install and Load Packages
+
+```{r}
+#List of packages we'll use. 
+packages <- c("tidyverse", "lme4", "ggplot2", "readr","naniar")  
+#Identifies which packages you already have
+install_if_missing <- setdiff(packages, rownames(installed.packages()))
+#Installs packages you don't have
+if (length(install_if_missing)) install.packages(install_if_missing)
+#Calls all needed packages 
+lapply(packages, library, character.only = TRUE)
+```
+
+Great! Now let's load our data from GitHub.
+
+```{r}
+url <- "https://raw.githubusercontent.com/madpax-csv/madpax-does-stats/refs/heads/master/wNAs_FourWaves_FTlevel.csv"
+FFH <- read_csv(url)
+#You may get an error about parsing issues, but it looks normal to me... 
+```
+
+**Explain dataset.**
+
+The Adversity and Close Relationships Lab surveyed students about their friendships at four different time points throughout their first year of college.
+
+In the summer (**Intake**) before they moved on campus, we asked them to list up to 7 current friends and how close they are to each friend, how long they've been friends, and whether this friend is in college.
+
+Then, in the Fall, Winter, and Spring, we asked if they still consider this person a friend. If they do, we then ask about how close they are to that friend now. (We do not ask about length of friendship or college enrollment for these friends again.)
+
+We are using a few key variables:
+
+-   **ID:** This is a given surveyed participants' unique ID number.
+
+-   **Time:** This refers to the time point at which responses were given (i.e., Intake, Fall, Winter, Spring).
+
+-   **H_FriendID\_:** This is a unique ID for each friend that a participant listed.
+
+-   **H_closeFriend:** This refers to how close a participant rated a friend at a given timepoint.
+
+    -   1 = Not At All Close; 5 = Extremely Close
+
+We may also look at a few controls and moderators, which I will include in our dataset for now, and will explain later when we come to it.
+
+Before we dive in, let's widdle down our dataset **FFH (friends from home)** to make it easier to explore. We'll also quickly ensure the data types are appropriate.
+
+```{r}
+FFH <- FFH %>%
+  select(c(
+    #Main variables of interest
+    ID, Time, H_FriendID_, H_closeFriend,
+    #Potential Controls 
+    inFSI, age, H_Friend_Intake,
+    #Potential Moderators
+    H_length, H_Friend_college,
+    #For Filtering
+    H_friend_in_Net
+  )) %>%
+  mutate(
+    ID = as.character(ID),
+    Time = factor(Time, levels = c("Intake", "Fall", "Winter", "Spring")),
+    H_FriendID_ = as.character(H_FriendID_),
+    H_closeFriend = as.numeric(H_closeFriend),
+    H_Friend_college = factor(H_Friend_college, levels = c(0, 1)),
+    H_length = as.numeric(H_length),
+    inFSI = factor(inFSI, levels = c(0, 1)),
+    age = as.numeric(age),
+    H_Friend_Intake = as.numeric(H_Friend_Intake)
+  )
+FFH <- FFH %>%
+  select(ID, H_FriendID_, everything())
+
+```
+
+**Walk through dataset and its structure.**
+
+**Our data is at the Friend/Time level. This means that each row represents how our participant thought of a friend at a given timepoint.**
+
+Below, you can print an example of how one participant responded about one friend at each timepoint. Notice how the ID and the Friend ID are both the same in each row, but the time point differs.
+
+```{r}
+structure_ex <- FFH %>%
+  filter(ID == "211810" & H_FriendID_ == "1")
+  
+print(structure_ex)
+```
+
+Let's look at all of the friends this participant listed to better understand the structure of the data.
+
+You'll notice that each Participant (**ID**) has at least one friend (**H_FriendID\_**) and for each friend, there is a time point (**Time**). In other words...
+
+**Participant (`ID`) → Friend (`H_FriendID_`) → Time point (`Time`)**
+
+Level 1: Repeated measurements (e.g., closeness over time)
+
+Level 2: Friend-level variables (e.g., how long they’ve known each friend)
+
+Level 3: Participant-level variables (e.g., age, inFSI)
+
+```{r}
+structure_ex2 <- FFH %>%
+  filter(ID == "211810")
+  
+print(structure_ex2)
+```
+
+Let's take a glimpse at our data.
+
+```{r}
+glimpse(FFH)
+gg_miss_var(FFH)
+
+```
+
+You might notice that while we have very few missing values for participant-level variables like age, there are many more missing values for friend-related variables. These missing values arise for two main reasons:
+
+1.  **Not all participants listed 7 friends** during the Intake survey—some listed fewer, leaving empty friend slots for information about closeness etc.
+
+2.  **Not all friends were still considered friends** at each time point (Fall, Winter, Spring), so their closeness ratings are missing for those waves
+
+Let's address each of these points. Luckily, in another file, our data has already noted when a participant hasn't listed someone in a given slot. So we are going to remove those slots where no one was listed. Let's see the effect that this had.
+
+We can see that those questions that were ONLY asked in Intake are now only missing for 5 participants – and we can assume that 5 people skipped one of those questions.
+
+```{r}
+FFH <- FFH %>%
+  filter(H_FriendID_ != "none listed")
+gg_miss_var(FFH)
+
+why <- FFH %>%
+  filter(is.na(H_length) | is.na(H_Friend_college))
+n_distinct(why$ID)
+```
+
+When a person listed as a friend at Intake is no longer named in Fall, Winter, or Spring, their closeness rating is left missing by default. However, this missingness is meaningful—it reflects the potential loss of a friendship, which is theoretically important. Rather than removing these cases, we recode their missing closeness values to 1, representing "Not at all close" on our scale. This allows us to retain these friends in the dataset and interpret their absence as a signal of relationship deterioration.
+
+```{r}
+FFH <- FFH %>%
+  mutate(H_closeFriend = if_else(H_friend_in_Net == 0, 1, H_closeFriend))
+```
+
+At this stage, any remaining missing values reflect questions that participants skipped. For simplicity, we’ll leave these observations in the dataset—our models today will automatically exclude missing values during analysis.
+
+Let's take a quick look at more information about our data.
+
+```{r}
+n_participants <- n_distinct(FFH$ID)
+print(paste("Number of unique participants:", n_participants))
+n_friends <- n_distinct(FFH$H_FriendID_)
+print(paste("Number of unique friends listed:", n_friends))
+
+FFH %>%
+  ggplot(aes(x = H_closeFriend)) +
+  geom_histogram(binwidth = 1, fill = "steelblue", color = "white", boundary = 0) +
+  facet_wrap(~Time) +
+  labs(title = "Histogram of Closeness by Timepoint",
+       x = "Closeness (1 = Not at all close, 5 = Extremely close)",
+       y = "Count") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+**So, we have 288 participants and 1,617 unique friends listed. In the table, you'll see a breakdown of closeness at each time point.**
+
+**Now that we know what we're working with, we can start to dicipher a model to investigate our research question:**
+
+What is the effect of Time on Closeness to friends from home?
+
+**Check assumptions.**
+
+**Choose a specific model.**
+
+**Run model.**
+
+**Create visualizations.**
+
+**Try model a different way. With controls? With random slopes etc?**
+
+**Compare models.**
+
+**Add in a moderator.**
+
+**Visualize.**
+
+**Compare.**
+
+```{r}
+print("hi")
+```
