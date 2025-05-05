@@ -442,6 +442,8 @@ check_model(main_analysis)
 
 ```
 
+So, we can see that
+
 ```{r}
 #
 # linear mixed‐model
