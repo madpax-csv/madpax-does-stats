@@ -10,7 +10,7 @@ categories: [research]
 
 Hi, welcome to my first tutorial!
 
-Today, we're going to be trying to understand how friendships change during the transition to college.
+Today, we’re going to better understand hierarchical modeling by trying to apply it to model how friendships change during the transition to college.
 
 But first, let's load and install all of the packages we'll need. Run the code below to install packages you may not already have.
 
@@ -472,6 +472,8 @@ check_model(main_analysis)
 **Compare.**
 
 **Conclusions and Wrap Up.**
+
+What we see here is that...
 
 ```{r}
 print("hi")
