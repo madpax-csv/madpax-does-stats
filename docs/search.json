@@ -68,5 +68,47 @@
     "title": "Tutorial",
     "section": "Testing Model Validity Further",
     "text": "Testing Model Validity Further\nLet’s run a few more tests to be sure that our model is valid.\nRemember we had some abnormality as far as the normality of the distribution of our outcome variable. Let’s see how this effects our model.\nWhat we see below is that in our normality test, the p-value &lt; 2.2×10⁻²² is astronomically small, so we have to reject the null hypothesis of “residuals are normally distributed.”\nBut with such a large sample (n ≈ 6,462), even tiny departures can give very low p-values. It’s best to:\n\nInspect a Q-Q plot of the residuals to judge practical importance, and…\nRemember that mixed models are fairly robust to modest normality violations—especially with balanced designs and large samples.\n\nIn the QQ Plot below, we see that actually, our data follows the line of “normality” alright afterall, with a bit of heavier tails than a perfect normal—i.e. a few residuals are more extreme than you’d expect under strict normality.\nWith ~6,500 observations, these mild deviations are common and usually not fatal for inference in a mixed model.\n\nlibrary(nortest)\nlillie.test(residuals(main_analysis))\n\n\n    Lilliefors (Kolmogorov-Smirnov) normality test\n\ndata:  residuals(main_analysis)\nD = 0.061099, p-value &lt; 0.00000000000000022\n\n# extract residuals\nres &lt;- residuals(main_analysis)\n\n# Q–Q plot\nqqnorm(residuals(main_analysis))\nqqline(residuals(main_analysis), col = \"blue\", lwd = 2)\n\n\n\n\n\n\n\n\nIf that’s the case – that we just have a few outliers influencing our model, let’s take a look at the most influential obesrvations and see if our model changes as a result.\nWe see many\n\n# install.packages(\"performance\")\nlibrary(performance)\nlibrary(see)\nout &lt;- check_outliers(main_analysis, \"zscore_robust\")\n\nConverting missing values (`NA`) into regular values currently not\n  possible for variables of class `NULL`.\n\nprint(out)\n\nOK: No outliers detected.\n- Based on the following method and threshold: zscore_robust (3.291).\n- For variable: (Whole model)\n\ncheck_autocorrelation(main_analysis)\n\nWarning: Autocorrelated residuals detected (p &lt; .001).\n\ncheck_singularity(main_analysis)\n\n[1] FALSE\n\ncheck_model(main_analysis)\n\n\n\n\n\n\n\n\n\n#\n# linear mixed‐model\n# library(lme4)\n# mod_lm &lt;- lmer(as.numeric(H_closeFriend) ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH)\n# AIC(mod_lm); BIC(mod_lm)\n# \n# # ordinal mixed‐model -- can't do slopes so we removed sloeps from both models.??? \n# library(ordinal)\n# mod_ord &lt;- clmm(as.factor(H_closeFriend)       \n#             ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH, link=\"logit\")\n# AIC(mod_ord, mod_lm, main_analysis); BIC(mod_ord, mod_lm, main_analysis)\n# \n# theme_set(theme_classic(base_size = 6))\n# nominal_test(mod_ord)\n\nAdd in a moderator.\nVisualize.\nCompare.\nConclusions and Wrap Up.\n\nprint(\"hi\")\n\n[1] \"hi\""
+  },
+  {
+    "objectID": "5.5.25AppPilot.html",
+    "href": "5.5.25AppPilot.html",
+    "title": "madpax does stats",
+    "section": "",
+    "text": "title: “App Pilot” author: “MKP” date: “2025-05-06” output: html_document ———————-"
+  },
+  {
+    "objectID": "5.5.25AppPilot.html#load-raw-data",
+    "href": "5.5.25AppPilot.html#load-raw-data",
+    "title": "madpax does stats",
+    "section": "Load raw data",
+    "text": "Load raw data\n\nfile_path &lt;- \"~/Downloads/Connection App Pilot_May 5, 2025_19.40.csv\"\npilot_raw &lt;- readr::read_csv(file_path)"
+  },
+  {
+    "objectID": "5.5.25AppPilot.html#extract-question-lookup",
+    "href": "5.5.25AppPilot.html#extract-question-lookup",
+    "title": "madpax does stats",
+    "section": "Extract question lookup",
+    "text": "Extract question lookup\n\nquestions &lt;- pilot_raw %&gt;%\n  slice(1) %&gt;%\n  tidyr::pivot_longer(\n    cols      = everything(),\n    names_to  = \"name\",\n    values_to = \"text\"\n  )"
+  },
+  {
+    "objectID": "5.5.25AppPilot.html#clean-and-recode-data",
+    "href": "5.5.25AppPilot.html#clean-and-recode-data",
+    "title": "madpax does stats",
+    "section": "Clean and recode data",
+    "text": "Clean and recode data\n\npilot &lt;- pilot_raw %&gt;%\n  # drop preview rows and header rows\n  filter(DistributionChannel != \"preview\") %&gt;%\n  slice(-1, -2) %&gt;%\n  # select ID plus all Q_* and ranking cols\n  select(ResponseId, contains(\"Q\"), starts_with(\"ReasonsFriends_\")) %&gt;%\n  # rename top-three age/location questions\n  rename(\n    Q_Age       = `Q_Dmg_Age.Home.Now._1`,\n    Q_Hometown  = `Q_Dmg_Age.Home.Now._2`,\n    Q_LivingNow = `Q_Dmg_Age.Home.Now._3`\n  ) %&gt;%\n  # numeric conversion\n  mutate(\n    across(1:13, as.numeric),\n    across(\n      c(Q_Age, Q_Gender, Q_Race, Q_Military,\n        Q_Edu, Q_Romantic, Q_Parent),\n      as.numeric\n    ),\n    # factor recodes\n    Q_Edu = factor(\n      Q_Edu,\n      levels = 1:7,\n      labels = c(\n        \"Some high school or less\",\n        \"High school diploma or GED\",\n        \"Some college, but no degree\",\n        \"Associates or technical degree\",\n        \"Bachelor’s degree\",\n        \"Graduate or professional degree\",\n        \"Prefer not to say\"\n      )\n    ),\n    Q_Race = factor(\n      Q_Race,\n      levels = 1:7,\n      labels = c(\n        \"White or Caucasian\",\n        \"Black or African American\",\n        \"American Indian/Native American or Alaska Native\",\n        \"Asian\",\n        \"Native Hawaiian or Other Pacific Islander\",\n        \"Other\",\n        \"Prefer not to say\"\n      )\n    ),\n    Q_Gender = factor(\n      Q_Gender,\n      levels = 1:5,\n      labels = c(\n        \"Man\",\n        \"Woman\",\n        \"Non-binary / third gender\",\n        \"Prefer to self-describe\",\n        \"Prefer not to say\"\n      )\n    )\n  )"
+  },
+  {
+    "objectID": "5.5.25AppPilot.html#quick-histograms",
+    "href": "5.5.25AppPilot.html#quick-histograms",
+    "title": "madpax does stats",
+    "section": "Quick histograms",
+    "text": "Quick histograms\n\n# All numeric Q_* variables\nDataExplorer::plot_histogram(pilot)\n\n\n\n\n\n\n\n\n\n# Demographics only\ndemo_vars &lt;- c(\n  \"Q_Age\", \"Q_Gender\", \"Q_Race\",\n  \"Q_Military\", \"Q_Romantic\", \"Q_Edu\", \"Q_Parent\"\n)\nDataExplorer::plot_histogram(pilot[demo_vars])\n\n\n\n\n\n\n\nDataExplorer::plot_bar(pilot[demo_vars])"
+  },
+  {
+    "objectID": "5.5.25AppPilot.html#average-ranking-for-group0-items",
+    "href": "5.5.25AppPilot.html#average-ranking-for-group0-items",
+    "title": "madpax does stats",
+    "section": "Average ranking for group0 items",
+    "text": "Average ranking for group0 items\n\nitem_labels &lt;- c(\n  \"1\"  = \"I simply forget to stay in contact.\",\n  \"2\"  = \"I have trouble making time to reach out.\",\n  \"3\"  = \"The conversation might not be enjoyable.\",\n  \"4\"  = \"Socializing takes a lot of energy for me.\",\n  \"5\"  = \"I don't know what we'll talk about.\",\n  \"6\"  = \"I'd rather spend time in-person.\",\n  \"7\"  = \"I don't want to bother that person.\",\n  \"8\"  = \"I don't like texting/calling.\",\n  \"9\"  = \"I feel like the other person should reach out.\",\n  \"10\" = \"The conversation might be awkward.\"\n)\n\navg_rank_group0 &lt;- pilot %&gt;%\n  select(ResponseId, starts_with(\"ReasonsFriends_0\")) %&gt;%\n  pivot_longer(\n    cols      = -ResponseId,\n    names_to  = \"col\",\n    values_to = \"rank\"\n  ) %&gt;%\n  mutate(\n    item = sub(\"ReasonsFriends_0_(\\\\d+)_RANK\", \"\\\\1\", col),\n    rank = as.integer(rank)\n  ) %&gt;%\n  group_by(item) %&gt;%\n  summarise(\n    avg_rank    = mean(rank,    na.rm = TRUE),\n    pct_top1    = mean(rank == 1, na.rm = TRUE) * 100,\n    pct_problem = mean(!is.na(rank)) * 100,\n    .groups     = \"drop\"\n  ) %&gt;%\n  mutate(\n    item = item_labels[item]\n  ) %&gt;%\n  arrange(avg_rank)\n\navg_rank_group0\n\n# A tibble: 11 × 4\n   item                                           avg_rank pct_top1 pct_problem\n   &lt;chr&gt;                                             &lt;dbl&gt;    &lt;dbl&gt;       &lt;dbl&gt;\n 1 I have trouble making time to reach out.           2.69    20.7         79.5\n 2 I simply forget to stay in contact.                2.83    24.1         79.5\n 3 I don't want to bother that person.                2.94    30.3         45.2\n 4 I'd rather spend time in-person.                   3.14    26           68.5\n 5 Socializing takes a lot of energy for me.          3.42    12.9         42.5\n 6 The conversation might not be enjoyable.           4       12.5         11.0\n 7 The conversation might be awkward.                 4.12    32           34.2\n 8 I don't know what we'll talk about.                4.21     0           26.0\n 9 I don't like texting/calling.                      4.26    11.1         37.0\n10 I feel like the other person should reach out.     4.38     4.17        32.9\n11 &lt;NA&gt;                                             NaN      NaN            0"
   }
 ]

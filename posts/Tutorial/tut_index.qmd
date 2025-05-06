@@ -19,7 +19,7 @@ But first, let's load and install all of the packages we'll need. Run the code b
 ```{r}
 #List of packages we'll use. 
 
-packages <- c("tidyverse","dplyr", "lme4", "ggplot2", "readr","naniar","nortest")  
+packages <- c("tidyverse","dplyr", "lme4", "ggplot2", "readr","naniar","nortest","emmeans","performance","lmerTest")  
 #Identifies which packages you already have
 install_if_missing <- setdiff(packages, rownames(installed.packages()))
 #Installs packages you don't have
@@ -223,7 +223,6 @@ Let's make sure that it **makes sense** to have random intercept for these. We d
 We'll start with a random intercept for `ID`.
 
 ```{r}
-library(lme4)
 model_participant <- lmer(H_closeFriend ~ 1 + (1 | ID), data = FFH)
 # Extract variance components from the model
 var_components <- as.data.frame(VarCorr(model_participant))
@@ -299,10 +298,9 @@ Now let's fit our model. Below, we model...
 The effect of `Time` on closeness `H_closeFriend` with random effects.
 
 ```{r}
-library(lmerTest)
 main_analysis <- lmer(
 H_closeFriend ~ Time +
-  (1 + Time | ID) +        # each participant has their own baseline closeness AND their own Time‐trend  
+ (1 + Time | ID) +        # each participant has their own baseline closeness AND their own Time‐trend  
   (1 | ID:H_FriendID_),    # each friendship (within participant) has its own baseline closeness
   data = FFH)
 summary(main_analysis)
@@ -315,7 +313,6 @@ summary(main_analysis)
 **Let's visualize the model to further our understanding.**
 
 ```{r}
-library(emmeans)
 
 # 1a. Get estimated marginal means
 emm <- emmeans(main_analysis, ~ Time, pbkrtest.limit = 6462)
@@ -339,9 +336,13 @@ print(main_plot)
 
 ```
 
+**We can see some pretty dramatic effects of the time on closeness! The average goes from about a 4 and then hovers below 3 for the rest of the year! This is exciting given that we are accounting for individual differences in how time effects closeness and individual differences in closeness to friends. But let's not get too excited just yet...**
+
 **Let's take a closer look at the random effects we've been modeling.**
 
 For that participant, we can now see how closeness to each friend rises or falls over the four waves—making the friend‐level variation explicit.
+
+Below, we see that the same participant's friends have similar slopes for closeness over time, regardless of initial closeness to a given friend.
 
 ```{r}
 # 1. Filter for one participant
@@ -352,7 +353,9 @@ df_pid <- FFH %>% filter(ID == pid)
 df_pid <- df_pid %>%
   mutate(pred = predict(main_analysis,
                         newdata = .,
-                        re.form = ~(1 + Time | ID) + (1 | ID:H_FriendID_)))
+                        re.form = ~
+                       #   (1 + Time | ID) + 
+                          (1 | ID:H_FriendID_)))
 
 # 3. Plot each friend’s trajectory
 ggplot(df_pid, aes(x = Time, y = pred, group = H_FriendID_, color = H_FriendID_)) +
@@ -413,7 +416,6 @@ In the QQ Plot below, we see that actually, our data follows the line of "normal
 With \~6,500 observations, these mild deviations are common and usually not fatal for inference in a mixed model.
 
 ```{r}
-library(nortest)
 lillie.test(residuals(main_analysis))
 
 # extract residuals
@@ -425,58 +427,49 @@ qqline(residuals(main_analysis), col = "blue", lwd = 2)
 
 ```
 
-If that's the case – that we just have a few outliers influencing our model, let's take a look at the most influential obesrvations and see if our model changes as a result.
+It's not too bad, but let's be sure to take a closer look at a few other tests to help us evaluate our model.
 
-We see many
+Below, I'll describe what we'll ideally see in each graph.
+
+**1. Posterior Predictive Check (Top left)**
+
+**Goal:** The model should be able to reproduce the shape of the observed data. **Ideally:** The green line (model-predicted) should closely overlap the blue line (observed). **Why it matters:** If they differ a lot, the model isn't capturing important patterns in the data.
+
+**2. Linearity (Top middle)**
+
+**Goal:** Residuals (errors) should have no trend—linearity assumes a straight-line relationship. **Ideally:** The blue smooth line should be flat and close to the dashed line at zero. **Why it matters:** A curve or slope in this plot suggests the model is missing a non-linear pattern.
+
+**3. Homogeneity of Variance (Middle left)**
+
+**Goal:** The spread of residuals should be roughly the same across fitted values. **Ideally:** Points should look randomly scattered around a flat green line—no "fan" shape. **Why it matters:** If variance changes across values, it could bias estimates.
+
+**4. Influential Observations (Top right)**
+
+**Goal:** No single point should overly influence the model. **Ideally:** Most points should be inside the dashed contour lines; none should stick out far. **Why it matters:** Outliers or high-leverage points can skew results and make them unreliable.
+
+**5. Normality of Residuals (Bottom left)**
+
+**Goal:** Residuals should be normally distributed. **Ideally:** Dots should fall along the diagonal line. **Why it matters:** This supports valid inference (e.g., p-values, confidence intervals).
+
+**6. Normality of Random Effects: ID:H_FriendID\_ (Middle right)**
+
+**Goal:** The distribution of friend-specific random effects should also be normal. **Ideally:** Dots along the diagonal line again. **Why it matters:** Violations may indicate the model structure is off for friend-level effects.
+
+**7. Normality of Random Effects: ID (Bottom right)**
+
+**Goal:** Participant-level random effects (intercepts and time slopes) should be normally distributed. **Ideally:** Each subplot (Intercept, TimeFall, etc.) should show points along the line. **Why it matters:** Helps ensure the model isn’t being distorted by a few unusual participants.
 
 ```{r}
-# install.packages("performance")
-library(performance)
-library(see)
-out <- check_outliers(main_analysis, "zscore_robust")
-print(out)
-
-check_autocorrelation(main_analysis)
-check_singularity(main_analysis)
 check_model(main_analysis)
 
 ```
 
-So, we can see that
+The **posterior predictive check** suggests reasonable predictive accuracy, but the model does not fully capture the distribution seen in the observed data. This could be due to floor/ceiling effects that aren't uncommon in survey data.
 
-```{r}
-#
-# linear mixed‐model
-# library(lme4)
-# mod_lm <- lmer(as.numeric(H_closeFriend) ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH)
-# AIC(mod_lm); BIC(mod_lm)
-# 
-# # ordinal mixed‐model -- can't do slopes so we removed sloeps from both models.??? 
-# library(ordinal)
-# mod_ord <- clmm(as.factor(H_closeFriend)       
-#             ~ Time + (1|ID) + (1|ID:H_FriendID_), data=FFH, link="logit")
-# AIC(mod_ord, mod_lm, main_analysis); BIC(mod_ord, mod_lm, main_analysis)
-# 
-# theme_set(theme_classic(base_size = 6))
-# nominal_test(mod_ord)
+**Linearity** and **homogeneity of variance** plots raise some concerns: these are also not modeling our data we provided very well, which means that the model may not fully capture non-linear patterns or variability across our values.
 
+These two red flags alone may be enough to consider another model. Because we keep seeing issues related to our distribution, it may be wise for us to consider a data that accounts for the Likert scale nature of our data. For us, this next step would be an **ordinal hierarchical regression. This model will allow us to account for the hierarchical nature of our data while accounting for its distribution.**
 
-```
+I know it's disappointing to get to the end of the tutorial with inconclusive results, but we now are one step closer to finding the best model for what happens in the real world. Plus, we got lots of practice! In our next step, we'll be able to evaluate that our model structure (as far as random slopes, intercepts) is still valid and then compare the linear and ordinal models to see which is the better fit after all.
 
-```{r}
-
-```
-
-**Add in a moderator.**
-
-**Visualize.**
-
-**Compare.**
-
-**Conclusions and Wrap Up.**
-
-What we see here is that...
-
-```{r}
-print("hi")
-```
+Happy checking!
