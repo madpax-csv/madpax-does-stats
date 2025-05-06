@@ -1,0 +1,167 @@
+---
+title: "App Pilot"
+author: "MKP"
+date: "2025-05-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Pilot as of 5/5/2025
+
+```{r cars}
+required_packages <- c("dplyr","ggplot2", "DataExplorer") 
+
+# Load required packages 
+for (pkg in required_packages) { if (!requireNamespace(pkg, quietly = TRUE)) {install.packages(pkg) } } 
+lapply(required_packages, library, character.only = TRUE) 
+
+
+```
+
+```{r pressure, echo=FALSE}
+required_packages <- c("dplyr","tidyr","ggplot2") 
+
+# Load required packages 
+for (pkg in required_packages) { if (!requireNamespace(pkg, quietly = TRUE)) {install.packages(pkg) } } 
+lapply(required_packages, library, character.only = TRUE) 
+```
+
+```{r}
+pilot <- read.csv("~/Downloads/Connection App Pilot_May 5, 2025_19.40.csv")
+
+# extract column names and first‐row (question text)
+question_names <- names(pilot)
+question_texts <- as.character(pilot[1, ])
+
+# combine into a lookup table
+questions <- tibble(
+  name = question_names,
+  text = question_texts
+)
+
+pilot <- pilot %>%
+  filter(DistributionChannel != "preview") %>%
+  slice(-c(1, 2)) %>%
+  select(c(ResponseId, contains("Q"), contains("RANK"))) %>%
+    rename(
+    Q_Age       = `Q_Dmg_Age.Home.Now._1`,
+    Q_Hometown  = `Q_Dmg_Age.Home.Now._2`,
+    Q_LivingNow = `Q_Dmg_Age.Home.Now._3`
+  ) %>%
+  mutate(
+    # first 13 columns to numeric
+    across(1:13, as.numeric),
+    # then these specific vars to numeric
+    across(c(Q_Age, Q_Gender, Q_Race, Q_Military, Q_Edu, Q_Romantic, Q_Parent),
+           as.numeric)
+  )
+
+pilot <- pilot %>%
+  mutate(
+    Q_Edu = factor(
+      Q_Edu,
+      levels = 1:7,
+      labels = c(
+        "Some high school or less",
+        "High school diploma or GED",
+        "Some college, but no degree",
+        "Associates or technical degree",
+        "Bachelor’s degree",
+        "Graduate or professional degree (MA, MS, MBA, PhD, JD, MD, DDS etc.)",
+        "Prefer not to say"
+      )
+    ),
+    Q_Race = factor(
+      Q_Race,
+      levels = 1:7,
+      labels = c(
+        "White or Caucasian",
+        "Black or African American",
+        "American Indian/Native American or Alaska Native",
+        "Asian",
+        "Native Hawaiian or Other Pacific Islander",
+        "Other",
+        "Prefer not to say"
+      )
+    )
+  )
+
+pilot <- pilot %>%
+  mutate(
+    Q_Gender = factor(
+      Q_Gender,
+      levels = 1:5,
+      labels = c(
+        "Man",
+        "Woman",
+        "Non-binary / third gender",
+        "Prefer to self-describe",
+        "Prefer not to say"
+      )
+    )
+  )
+
+```
+
+Histograms:
+
+```{r}
+# by default it'll plot all numeric columns
+Agree <- pilot %>%
+  select(c(contains("Q4"), contains("Q5"), contains("IOS"))) 
+plot_histogram(Agree)
+```
+
+```{r}
+Demos <- pilot %>%
+  select(c(
+    "Q_Age",
+    "Q_Gender",
+    "Q_Race",
+    "Q_Military",
+    "Q_Romantic",
+    "Q_Edu",
+    "Q_Parent"
+  ))
+plot_histogram(Demos)
+plot_bar(Demos)
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# lookup for group0 item labels
+item_labels <- c(
+  "1"  = "I simply forget to stay in contact.",
+  "2"  = "I have trouble making time to reach out.",
+  "3"  = "The conversation might not be enjoyable.",
+  "4"  = "In general, socializing takes a lot of energy for me.",
+  "5"  = "I don't know what we'll talk about.",
+  "6"  = "I'd rather spend time in-person.",
+  "7"  = "I don't want to bother that person.",
+  "8"  = "I don't like texting/calling.",
+  "9"  = "I feel like the other person should reach out.",
+  "10" = "The conversation might be awkward."
+)
+
+avg_rank_group0 <- pilot %>%
+  select(c(contains("ReasonsFriends_0")),
+    names_to = c(NA, "group", "item", NA),
+    names_sep = "_",
+    values_to = "rank"
+  ) %>%
+  filter(group == "0", !is.na(rank)) %>%
+  mutate(rank = as.integer(rank)) %>%
+  group_by(item) %>%
+  summarize(avg_rank = mean(rank), .groups = "drop") %>%
+  # then rename items
+  mutate(item = item_labels[item]) %>%
+  arrange(avg_rank)
+
+avg_rank_group0
+
+```
