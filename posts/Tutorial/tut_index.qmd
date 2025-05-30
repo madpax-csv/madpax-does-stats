@@ -281,6 +281,7 @@ time_slope <- lmer(
 summary(time_slope)
 
 anova(model_participant, model_friendXparticipant, time_slope)
+
 ```
 
 In our likelihood ratio rest and AIC comparison, we see a huge AIC drop (22474→18011) and highly significant LRT; allowing each participant to have their own Time‐trend dramatically improves the model.
@@ -304,6 +305,7 @@ H_closeFriend ~ Time +
   (1 | ID:H_FriendID_),    # each friendship (within participant) has its own baseline closeness
   data = FFH)
 summary(main_analysis)
+AIC(main_analysis)
 ```
 
 **We can see from this model that each time point is associated with a significant drop in closeness, even with our random effects.**
@@ -424,6 +426,7 @@ res <- residuals(main_analysis)
 # Q–Q plot
 qqnorm(residuals(main_analysis))
 qqline(residuals(main_analysis), col = "blue", lwd = 2)
+
 
 ```
 
